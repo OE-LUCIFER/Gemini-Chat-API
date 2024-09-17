@@ -41,7 +41,7 @@ Let's explore some fun examples of how to use the Gemini Chat API! 🎈
 Imagine you want to ask Gemini to tell you a heartwarming story. Here's how you can do it:
 
 ```python
-gemini = GeminiWithCookie('cookie.json')
+gemini = Gemini('cookie.json')
 response = gemini.ask("🌟 Can you tell me a magical story about a brave little girl and her talking cat? 🐱✨")
 print(response)
 ```
@@ -51,7 +51,7 @@ print(response)
 Let's say you want Gemini to help you solve a riddle. Here's how you can ask:
 
 ```python
-gemini = GeminiWithCookie('cookie.json')
+gemini = Gemini('cookie.json')gemini = Gemini('cookie.json')
 response = gemini.ask("""
 🤔 Can you help me solve this riddle?
 
@@ -60,12 +60,22 @@ I speak without a mouth and hear without ears. I have no body, but I come alive 
 print(response)
 ```
 
+### 🧠 WebSearch Example
+
+Let's say you want to ask realtime data:
+
+```python
+gemini = Gemini('cookie.json')
+response = gemini.ask("Who is developer of HelpingAI-9B")
+print(response)
+```
+
 ### 🎨 Creative Writing Example
 
 Want to spark your creativity? Ask Gemini for a writing prompt:
 
 ```python
-gemini = GeminiWithCookie('cookie.json')
+gemini = Gemini('cookie.json')
 response = gemini.ask("🖋️ Give me an intriguing writing prompt for a science fiction short story. 🚀")
 print(response)
 ```
