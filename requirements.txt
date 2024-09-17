@@ -1,0 +1,3 @@
+requests
+cerebras-cloud-sdk
+fake-useragent
