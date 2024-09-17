@@ -51,7 +51,7 @@ print(response)
 Let's say you want Gemini to help you solve a riddle. Here's how you can ask:
 
 ```python
-gemini = Gemini('cookie.json')gemini = Gemini('cookie.json')
+gemini = Gemini('cookie.json')
 response = gemini.ask("""
 🤔 Can you help me solve this riddle?
 
