@@ -1,11 +1,11 @@
 import requests
 import json
 import re
-from typing import Optional
+from typing import Optional, List
 from fake_useragent import UserAgent
 
 class Gemini:
-    def __init__(self, cookie_path: str):
+    def __init__(self, cookie_path: str, timeout: int = 30):
         """
         Initializes the Gemini client with the provided cookie.
 
@@ -27,6 +27,7 @@ class Gemini:
         self.conversation_id = ""
         self.response_id = ""
         self.choice_id = ""
+        self.timeout = timeout
 
     @staticmethod
     def load_cookies(cookie_path: str) -> tuple:
@@ -68,13 +69,13 @@ class Gemini:
         except requests.RequestException as e:
             raise Exception(f"Failed to retrieve SNlM0e: {e}")
 
-    def ask(self, question: str, sys_prompt: str = "") -> Optional[str]:
+    def ask(self, question: str, sys_prompt: str = "") -> Optional[dict]:
         """
-        Sends a question to the Gemini model and retrieves the answer.
+        Sends a question to the Gemini model and retrieves the answer, including images.
 
         :param question: The question to ask.
         :param sys_prompt: System prompt (not used in Gemini, kept for compatibility).
-        :return: The model's answer or None if the request fails.
+        :return: A dictionary containing the model's answer and a list of images, or None if the request fails.
         """
         try:
             params = {
@@ -82,43 +83,68 @@ class Gemini:
                 "_reqid": "0",
                 "rt": "c",
             }
-            
+
             message_struct = [
                 [question],
                 None,
                 [self.conversation_id, self.response_id, self.choice_id],
             ]
-            
+
             data = {
                 "f.req": json.dumps([None, json.dumps(message_struct)]),
                 "at": self.SNlM0e,
             }
-            
+
             response = self.session.post(
                 "https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate",
                 params=params,
                 data=data,
+                timeout=self.timeout,
             )
             response.raise_for_status()
             
-            chat_data = json.loads(response.content.splitlines()[3])[0][2]
+            try:
+                chat_data = json.loads(response.content.splitlines()[3])[0][2]
+            except (IndexError, json.JSONDecodeError) as e:
+                print(f"Error parsing response: {e}")
+                return {"content": None, "images": []}
+
             if not chat_data:
-                return None
-            
+                return {"content": None, "images": []}
+
             json_chat_data = json.loads(chat_data)
-            content = json_chat_data[4][0][1][0]
-            
-            self.conversation_id = json_chat_data[1][0]
-            self.response_id = json_chat_data[1][1]
-            self.choice_id = json_chat_data[4][0][0]
-            
-            return content
+            images = []
+            try:
+                if len(json_chat_data) >= 3 and len(json_chat_data[4][0]) >= 4 and json_chat_data[4][0][4]:
+                    for img_data in json_chat_data[4][0][4]:
+                        try:
+                            images.append(img_data[0][0][0])
+                        except (IndexError, TypeError):
+                            pass
+            except (IndexError, TypeError) as e:
+                print(f"Error extracting images from response: {e}")
+                pass
+
+            results = {
+                "content": json_chat_data[4][0][1][0] if len(json_chat_data[4][0][1]) > 0 else None,
+                "conversation_id": json_chat_data[1][0],
+                "response_id": json_chat_data[1][1],
+                "images": images,
+            }
+            self.conversation_id = results["conversation_id"]
+            self.response_id = results["response_id"]
+            self.choice_id = json_chat_data[4][0][0] if len(json_chat_data[4][0]) > 0 else ""
+
+            return results
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {e}")
+            return {"content": None, "images": []}
         except Exception as e:
             print(f"An error occurred: {e}")
-            return None
+            return {"content": None, "images": []}
 
 if __name__ == "__main__":
     gemini = Gemini('cookie.json')
     response = gemini.ask(input(">>> "))
-    for chunk in response:
-        print(chunk, end="", flush=True)
+    for chat in response["content"]:
+        print(chat, end="", flush=True)
