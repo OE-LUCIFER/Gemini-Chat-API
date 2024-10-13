@@ -43,7 +43,7 @@ Imagine you want to ask Gemini to tell you a heartwarming story. Here's how you 
 ```python
 gemini = Gemini('cookie.json')
 response = gemini.ask("🌟 Can you tell me a magical story about a brave little girl and her talking cat? 🐱✨")
-print(response)
+print(response["content"])
 ```
 
 ### 🧠 Problem-Solving Example
@@ -57,7 +57,7 @@ response = gemini.ask("""
 
 I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?
 """)
-print(response)
+print(response["content"])
 ```
 
 ### 🧠 WebSearch Example
@@ -65,9 +65,9 @@ print(response)
 Let's say you want to ask realtime data:
 
 ```python
-gemini = Gemini('cookie.json')
+gemini = Gemini('cookie.json')gemini = Gemini('cookie.json')
 response = gemini.ask("Who is developer of HelpingAI-9B")
-print(response)
+print(response["content"])
 ```
 
 ### 🎨 Creative Writing Example
@@ -77,7 +77,7 @@ Want to spark your creativity? Ask Gemini for a writing prompt:
 ```python
 gemini = Gemini('cookie.json')
 response = gemini.ask("🖋️ Give me an intriguing writing prompt for a science fiction short story. 🚀")
-print(response)
+print(response["content"])
 ```
 
 ## Contributing 🤝💕
