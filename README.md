@@ -65,7 +65,7 @@ print(response["content"])
 Let's say you want to ask realtime data:
 
 ```python
-gemini = Gemini('cookie.json')gemini = Gemini('cookie.json')
+gemini = Gemini('cookie.json')
 response = gemini.ask("Who is developer of HelpingAI-9B")
 print(response["content"])
 ```
