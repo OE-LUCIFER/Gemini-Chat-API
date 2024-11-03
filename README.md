@@ -145,7 +145,6 @@ if response['images']:
         print(f"Image URL: {img_url}")
 ```
 
-For exhaustive method descriptions, usage scenarios, and best practices, refer to our [detailed API documentation](https://github.com/OE-LUCIFER/Gemini-Chat-API/wiki).
 
 </details>
 
@@ -202,7 +201,6 @@ We welcome contributions! Here's how you can help:
 4. 🚀 Push to the branch (`git push origin feature/AmazingFeature`)
 5. 🎉 Open a Pull Request
 
-Check out our [Contribution Guide](CONTRIBUTING.md) for more details.
 
 <div align="center">
 
@@ -219,7 +217,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 [![GitHub issues](https://img.shields.io/github/issues/OE-LUCIFER/Gemini-Chat-API.svg)](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/OE-LUCIFER/Gemini-Chat-API.svg)](https://github.com/OE-LUCIFER/Gemini-Chat-API/pulls)
 
-[Report a Bug](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues/new?template=bug_report.md) • [Request a Feature](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues/new?template=feature_request.md) • [Join our Discord](https://discord.gg/your-discord-link)
+[Report a Bug](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues/new?template=bug_report.md) • [Request a Feature](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues/new?template=feature_request.md) • [Telegram](https://t.me/+fkDLeY7gZyllMTY9)
 
 </div>
 
