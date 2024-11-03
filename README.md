@@ -178,7 +178,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you found this project helpful, give it a star!
 
-[Report Bug](https://github.com/yourusername/gemini-python-api/issues) • [Request Feature](https://github.com/yourusername/gemini-python-api/issues)
+[Report Bug](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues) • [Request Feature](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues)
 
 </div>
 
