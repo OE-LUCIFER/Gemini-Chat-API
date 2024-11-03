@@ -1,19 +1,35 @@
 import requests
 import json
 import re
-from typing import Optional, List
+from typing import Optional, Dict
 from fake_useragent import UserAgent
+
+class GeminiConversation:
+    def __init__(self):
+        self.conversation_id = ""
+        self.response_id = ""
+        self.choice_id = ""
 
 class Gemini:
     def __init__(self, cookie_path: str, timeout: int = 30):
         """
         Initializes the Gemini client with the provided cookie.
 
-        :param cookie_path: Path to the cookie JSON file.
+        Args:
+            cookie_path (str): Path to the cookie JSON file
+            timeout (int, optional): Request timeout in seconds. Defaults to 30
         """
-        self.session_auth1, self.session_auth2 = self.load_cookies(cookie_path)
-        self.session = requests.Session()
-        self.session.headers.update({
+        self.session_auth1, self.session_auth2 = self._load_cookies(cookie_path)
+        self.session = self._init_session()
+        self.SNlM0e = self._get_snlm0e()
+        self.conversations: Dict[str, GeminiConversation] = {}
+        self.timeout = timeout
+        self.current_conversation = None
+
+    def _init_session(self) -> requests.Session:
+        """Initialize and configure requests session"""
+        session = requests.Session()
+        session.headers.update({
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Host": "gemini.google.com",
             "Origin": "https://gemini.google.com",
@@ -21,21 +37,20 @@ class Gemini:
             "User-Agent": UserAgent().random,
             "X-Same-Domain": "1",
         })
-        self.session.cookies.set("__Secure-1PSID", self.session_auth1)
-        self.session.cookies.set("__Secure-1PSIDTS", self.session_auth2)
-        self.SNlM0e = self.get_snlm0e()
-        self.conversation_id = ""
-        self.response_id = ""
-        self.choice_id = ""
-        self.timeout = timeout
+        session.cookies.set("__Secure-1PSID", self.session_auth1)
+        session.cookies.set("__Secure-1PSIDTS", self.session_auth2)
+        return session
 
     @staticmethod
-    def load_cookies(cookie_path: str) -> tuple:
+    def _load_cookies(cookie_path: str) -> tuple:
         """
-        Loads cookies from the provided JSON file.
+        Load cookies from the provided JSON file.
 
-        :param cookie_path: Path to the cookie JSON file.
-        :return: Tuple containing __Secure-1PSID and __Secure-1PSIDTS values.
+        Args:
+            cookie_path (str): Path to the cookie JSON file
+
+        Returns:
+            tuple: (__Secure-1PSID, __Secure-1PSIDTS) values
         """
         try:
             with open(cookie_path, 'r') as file:
@@ -50,12 +65,8 @@ class Gemini:
         except StopIteration:
             raise Exception("Required cookies not found in the cookie file.")
 
-    def get_snlm0e(self) -> str:
-        """
-        Retrieves the SNlM0e value required for Gemini requests.
-
-        :return: SNlM0e value.
-        """
+    def _get_snlm0e(self) -> str:
+        """Get the SNlM0e value required for Gemini requests"""
         try:
             resp = self.session.get(
                 "https://gemini.google.com/app",
@@ -69,14 +80,75 @@ class Gemini:
         except requests.RequestException as e:
             raise Exception(f"Failed to retrieve SNlM0e: {e}")
 
-    def ask(self, question: str, sys_prompt: str = "") -> Optional[dict]:
+    def create_conversation(self, conversation_name: str = None) -> str:
         """
-        Sends a question to the Gemini model and retrieves the answer, including images.
+        Create a new conversation.
 
-        :param question: The question to ask.
-        :param sys_prompt: System prompt (not used in Gemini, kept for compatibility).
-        :return: A dictionary containing the model's answer and a list of images, or None if the request fails.
+        Args:
+            conversation_name (str, optional): Name for the conversation. 
+                If None, generates a unique name.
+
+        Returns:
+            str: Conversation name
         """
+        if conversation_name is None:
+            conversation_name = f"conversation_{len(self.conversations) + 1}"
+        
+        if conversation_name in self.conversations:
+            raise ValueError(f"Conversation '{conversation_name}' already exists")
+        
+        self.conversations[conversation_name] = GeminiConversation()
+        self.current_conversation = conversation_name
+        return conversation_name
+
+    def switch_conversation(self, conversation_name: str) -> None:
+        """
+        Switch to a different conversation.
+
+        Args:
+            conversation_name (str): Name of the conversation to switch to
+        """
+        if conversation_name not in self.conversations:
+            raise ValueError(f"Conversation '{conversation_name}' does not exist")
+        self.current_conversation = conversation_name
+
+    def list_conversations(self) -> list:
+        """List all available conversations"""
+        return list(self.conversations.keys())
+
+    def delete_conversation(self, conversation_name: str) -> None:
+        """
+        Delete a conversation.
+
+        Args:
+            conversation_name (str): Name of the conversation to delete
+        """
+        if conversation_name not in self.conversations:
+            raise ValueError(f"Conversation '{conversation_name}' does not exist")
+        
+        del self.conversations[conversation_name]
+        if self.current_conversation == conversation_name:
+            self.current_conversation = None if not self.conversations else next(iter(self.conversations))
+
+    def ask(self, question: str, conversation_name: str = None) -> Optional[dict]:
+        """
+        Send a question to Gemini and get the response.
+
+        Args:
+            question (str): The question to ask
+            conversation_name (str, optional): Name of the conversation to use. 
+                If None, uses current conversation
+
+        Returns:
+            Optional[dict]: Response containing content and images
+        """
+        if conversation_name:
+            self.switch_conversation(conversation_name)
+        elif not self.current_conversation:
+            self.create_conversation()
+
+        conv = self.conversations[self.current_conversation]
+
         try:
             params = {
                 "bl": "boq_assistant-bard-web-server_20230713.13_p0",
@@ -87,7 +159,7 @@ class Gemini:
             message_struct = [
                 [question],
                 None,
-                [self.conversation_id, self.response_id, self.choice_id],
+                [conv.conversation_id, conv.response_id, conv.choice_id],
             ]
 
             data = {
@@ -103,27 +175,18 @@ class Gemini:
             )
             response.raise_for_status()
             
-            try:
-                chat_data = json.loads(response.content.splitlines()[3])[0][2]
-            except (IndexError, json.JSONDecodeError) as e:
-                print(f"Error parsing response: {e}")
-                return {"content": None, "images": []}
-
+            chat_data = json.loads(response.content.splitlines()[3])[0][2]
             if not chat_data:
                 return {"content": None, "images": []}
 
             json_chat_data = json.loads(chat_data)
             images = []
-            try:
-                if len(json_chat_data) >= 3 and len(json_chat_data[4][0]) >= 4 and json_chat_data[4][0][4]:
-                    for img_data in json_chat_data[4][0][4]:
-                        try:
-                            images.append(img_data[0][0][0])
-                        except (IndexError, TypeError):
-                            pass
-            except (IndexError, TypeError) as e:
-                print(f"Error extracting images from response: {e}")
-                pass
+            if len(json_chat_data) >= 3 and len(json_chat_data[4][0]) >= 4 and json_chat_data[4][0][4]:
+                for img_data in json_chat_data[4][0][4]:
+                    try:
+                        images.append(img_data[0][0][0])
+                    except (IndexError, TypeError):
+                        continue
 
             results = {
                 "content": json_chat_data[4][0][1][0] if len(json_chat_data[4][0][1]) > 0 else None,
@@ -131,20 +194,71 @@ class Gemini:
                 "response_id": json_chat_data[1][1],
                 "images": images,
             }
-            self.conversation_id = results["conversation_id"]
-            self.response_id = results["response_id"]
-            self.choice_id = json_chat_data[4][0][0] if len(json_chat_data[4][0]) > 0 else ""
+
+            # Update conversation state
+            conv.conversation_id = results["conversation_id"]
+            conv.response_id = results["response_id"]
+            conv.choice_id = json_chat_data[4][0][0] if len(json_chat_data[4][0]) > 0 else ""
 
             return results
-        except requests.exceptions.RequestException as e:
-            print(f"Request error: {e}")
-            return {"content": None, "images": []}
+
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return {"content": None, "images": []}
+            return {"content": f"Error: {str(e)}", "images": []}
+
+def main():
+    """Example usage of the Gemini client"""
+    gemini = Gemini('cookie.json')
+    
+    # Create a few conversations
+    gemini.create_conversation("daily_chat")
+    # gemini.create_conversation("coding_help")
+    
+    print("Available conversations:", gemini.list_conversations())
+
+    # Show current conversation
+    print(f"\nCurrent conversation: {gemini.current_conversation}")
+    print("\nCommands:")
+    print("  /switch <name> - Switch to a different conversation")
+    print("  /new <name> - Create a new conversation")
+    print("  /list - List all conversations")
+    print("  /delete <name> - Delete a conversation")
+    print("  /quit - Exit the program")
+
+    # Chat in different conversations
+    while True:
+        try:          
+            user_input = input("\n>>> ")
+            
+            # Handle commands
+            if user_input.startswith('/'):
+                cmd_parts = user_input.split()
+                cmd = cmd_parts[0].lower()
+                
+                if cmd == '/switch' and len(cmd_parts) > 1:
+                    gemini.switch_conversation(cmd_parts[1])
+                elif cmd == '/new' and len(cmd_parts) > 1:
+                    gemini.create_conversation(cmd_parts[1])
+                elif cmd == '/list':
+                    print("Conversations:", gemini.list_conversations())
+                elif cmd == '/delete' and len(cmd_parts) > 1:
+                    gemini.delete_conversation(cmd_parts[1])
+                elif cmd == '/quit':
+                    break
+                else:
+                    print("Invalid command")
+                continue
+            
+            # Send message and get response
+            response = gemini.ask(user_input)
+            if response and response["content"]:
+                print("\nGemini:", response["content"])
+                if response["images"]:
+                    print("\nImages:", response["images"])
+            else:
+                print("\nNo response received")
+                
+        except Exception as e:
+            print(f"Error: {str(e)}")
 
 if __name__ == "__main__":
-    gemini = Gemini('cookie.json')
-    response = gemini.ask(input(">>> "))
-    for chat in response["content"]:
-        print(chat, end="", flush=True)
+    main()
