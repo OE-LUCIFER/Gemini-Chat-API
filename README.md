@@ -1,184 +1,225 @@
-# 🌟 Gemini Python API
-
 <div align="center">
+
+# 🌟 Gemini Python API
 
 ![Gemini API](https://img.shields.io/badge/Gemini-API-blue?style=for-the-badge&logo=google)
 ![Python](https://img.shields.io/badge/Python-3.6+-green?style=for-the-badge&logo=python)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-*An unofficial Python client for interacting with Google's Gemini chat model* 🚀
+[![GitHub stars](https://img.shields.io/github/stars/OE-LUCIFER/Gemini-Chat-API.svg?style=social&label=Star)](https://github.com/OE-LUCIFER/Gemini-Chat-API)
+[![GitHub forks](https://img.shields.io/github/forks/OE-LUCIFER/Gemini-Chat-API.svg?style=social&label=Fork)](https://github.com/OE-LUCIFER/Gemini-Chat-API/fork)
+[![GitHub watchers](https://img.shields.io/github/watchers/OE-LUCIFER/Gemini-Chat-API.svg?style=social&label=Watch)](https://github.com/OE-LUCIFER/Gemini-Chat-API)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
+Unleash the power of Google's Gemini in your Python projects! 🚀
+
+[Features](#-features-showcase) • [Installation](#%EF%B8%8F-installation--setup) • [Usage](#-quick-start-guide) • [Documentation](#-comprehensive-documentation) • [Contributing](#-contribution-guidelines)
 
 </div>
 
-## ✨ Features
+<div align="center">
 
-- 🔐 Cookie-based authentication
-- 🔄 Session management with automatic cookie handling
-- 🌐 Support for conversation context
-- 🖼️ Image extraction from responses
-- 🔧 Customizable timeout settings
-- 🎭 Random User-Agent generation
-- 🔄 Conversation tracking with IDs
+## 🌈 Features Showcase
 
-## 📋 Requirements
+</div>
 
-- Python 3.6+
-- `requests`
-- `fake-useragent`
-- Google account with access to Gemini
+<table align="center">
+  <tr>
+    <td align="center">🔐<br>Secure Authentication</td>
+    <td align="center">🔄<br>Dynamic Sessions</td>
+    <td align="center">💬<br>Multi-Conversation Support</td>
+    <td align="center">🌐<br>Context Preservation</td>
+  </tr>
+  <tr>
+    <td align="center">🖼️<br>Image Response Handling</td>
+    <td align="center">⏱️<br>Customizable Timeouts</td>
+    <td align="center">🎭<br>User-Agent Randomization</td>
+    <td align="center">🔍<br>Conversation Tracking</td>
+  </tr>
+</table>
 
-## 🛠️ Installation
+<div align="center">
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/gemini-python-api.git
-cd gemini-python-api
-```
+## 🛠️ Installation & Setup
 
-2. **Install dependencies**
-```bash
-pip install requests fake-useragent
-```
+</div>
 
-3. **Cookie Setup** 🍪
+<details>
+<summary><strong>Click to expand detailed setup instructions</strong></summary>
 
-Install the Cookie-Editor extension:
-- [Chrome Extension](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)
-- [Edge Extension](https://microsoftedge.microsoft.com/addons/detail/cookie-editor/neaplmfkghagebokkhpjpoebhdledlfi)
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/OE-LUCIFER/Gemini-Chat-API.git
+   cd Gemini-Chat-API
+   ```
 
-To export your cookies:
-1. Visit [gemini.google.com](https://gemini.google.com/)
-2. Open Cookie-Editor
-3. Click "Export" (This will copy cookies to clipboard)
-4. Create `cookie.json` in your project directory
-5. Paste the exported cookies into `cookie.json`
+2. **Set Up Virtual Environment (Recommended):**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
 
-## 🚀 Quick Start
+3. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Cookie Configuration:**
+   - Install [Cookie-Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) extension
+   - Visit [gemini.google.com](https://gemini.google.com/)
+   - Export cookies and save as `cookie.json` in the project root
+
+5. **Verify Installation:**
+   ```bash
+   python -c "from gemini import Gemini; print('Setup successful!')"
+   ```
+
+</details>
+
+<div align="center">
+
+## 🚀 Quick Start Guide
+
+</div>
 
 ```python
 from gemini import Gemini
 
-# Initialize with cookie file
+# Initialize Gemini client
 gemini = Gemini('cookie.json')
 
-# Send a simple message
-response = gemini.ask("Hello, Gemini!")
-print(response["content"])
+# Create a new conversation
+chat = gemini.create_conversation("AI_Ethics")
+
+# Ask a question
+response = gemini.ask("What are the key ethical considerations in AI development?", chat)
+
+print(f"Gemini says: {response['content']}")
+
+# Handle image responses
+if response['images']:
+    print(f"Related images: {response['images']}")
 ```
 
-## 📖 Documentation
+<div align="center">
+
+## 📘 Comprehensive Documentation
+
+</div>
+
+<details>
+<summary><strong>Expand for API details and advanced usage</strong></summary>
 
 ### Gemini Class
-
 ```python
 class Gemini:
     def __init__(self, cookie_path: str, timeout: int = 30)
 ```
 
-#### Parameters:
-- `cookie_path`: Path to the JSON file containing cookies
-- `timeout`: Request timeout in seconds (default: 30)
+### Core Methods
+- `create_conversation(name: str) -> str`
+- `switch_conversation(name: str) -> None`
+- `list_conversations() -> list`
+- `delete_conversation(name: str) -> None`
+- `ask(question: str, conversation: str = None) -> dict`
 
-### Methods
+### Advanced Usage Examples
 
-#### `ask(question: str, sys_prompt: str = "") -> Optional[dict]`
-
-Sends a question to Gemini and returns the response.
-
-**Parameters:**
-- `question`: The message to send
-- `sys_prompt`: System prompt (not used, kept for compatibility)
-
-**Returns:**
+#### Managing Multiple Conversations
 ```python
-{
-    "content": str,          # The response text
-    "conversation_id": str,  # Conversation identifier
-    "response_id": str,      # Response identifier
-    "images": List[str]      # List of image URLs (if any)
-}
+gemini.create_conversation("Science")
+gemini.create_conversation("Philosophy")
+
+gemini.switch_conversation("Science")
+science_response = gemini.ask("Explain quantum entanglement")
+
+gemini.switch_conversation("Philosophy")
+philosophy_response = gemini.ask("Discuss the trolley problem")
 ```
 
-### Response Structure
-
-The response dictionary contains:
-- `content`: The main text response
-- `conversation_id`: ID for tracking the conversation
-- `response_id`: ID for the specific response
-- `images`: List of image URLs (if present in the response)
-
-## 🔍 Error Handling
-
-The API handles several types of errors:
-- Cookie file not found
-- Invalid JSON format in cookie file
-- Missing required cookies
-- Network request failures
-- Response parsing errors
-
-## ⚠️ Important Notes
-
-1. **Cookie Management**
-   - Cookies must contain `__Secure-1PSID` and `__Secure-1PSIDTS`
-   - Keep your cookies secure and don't share them
-   - Update cookies if they expire
-
-2. **Rate Limiting**
-   - Implement appropriate rate limiting in your applications
-   - Monitor response status for API limitations
-
-3. **Session Management**
-   - Each instance maintains its own session
-   - Conversations are tracked using IDs
-
-## 🤖 Example Usage
-
-### Basic Conversation
+#### Handling Image Responses
 ```python
-gemini = Gemini('cookie.json')
-response = gemini.ask("What is quantum computing?")
-print(response["content"])
+response = gemini.ask("Show me a diagram of a black hole")
+if response['images']:
+    for img_url in response['images']:
+        # Process or display the image
+        print(f"Image URL: {img_url}")
 ```
 
-### With Custom Timeout
-```python
-gemini = Gemini('cookie.json', timeout=60)
-response = gemini.ask("Can you explain machine learning?")
-print(response["content"])
-```
+For exhaustive method descriptions, usage scenarios, and best practices, refer to our [detailed API documentation](https://github.com/OE-LUCIFER/Gemini-Chat-API/wiki).
 
-### Handling Images in Response
-```python
-gemini = Gemini('cookie.json')
-response = gemini.ask("Show me an example of a neural network")
-print(response["content"])
-for image_url in response["images"]:
-    print(f"Image URL: {image_url}")
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+</details>
 
 <div align="center">
 
-## ⭐ Support
+## 🛡️ Error Handling & Reliability
 
-If you found this project helpful, give it a star!
+</div>
 
-[Report Bug](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues) • [Request Feature](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues)
+Our robust error handling system ensures smooth operation:
+
+- 🔒 Authentication Issues
+- 🌐 Network Connectivity Problems
+- ⏱️ Timeout Management
+- 🧩 Response Parsing Errors
+
+Implement try-except blocks for graceful error management in your applications.
+
+<div align="center">
+
+## 🔧 Configuration & Customization
+
+</div>
+
+Tailor the Gemini API to your needs:
+
+- ⚙️ Adjust timeout settings
+- 🔀 Implement custom conversation management
+- 🎨 Extend functionality with additional methods
+
+<div align="center">
+
+## 📊 Performance Optimization
+
+</div>
+
+Tips for optimal performance:
+
+- 🚀 Use async operations for concurrent requests
+- 💾 Implement caching for frequent queries
+- 🔍 Optimize conversation context management
+
+<div align="center">
+
+## 🤝 Contribution Guidelines
+
+</div>
+
+We welcome contributions! Here's how you can help:
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. 🖊️ Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. 🚀 Push to the branch (`git push origin feature/AmazingFeature`)
+5. 🎉 Open a Pull Request
+
+Check out our [Contribution Guide](CONTRIBUTING.md) for more details.
+
+<div align="center">
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+</div>
+
+<div align="center">
+
+## 💖 Support & Community
+
+[![GitHub issues](https://img.shields.io/github/issues/OE-LUCIFER/Gemini-Chat-API.svg)](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/OE-LUCIFER/Gemini-Chat-API.svg)](https://github.com/OE-LUCIFER/Gemini-Chat-API/pulls)
+
+[Report a Bug](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues/new?template=bug_report.md) • [Request a Feature](https://github.com/OE-LUCIFER/Gemini-Chat-API/issues/new?template=feature_request.md) • [Join our Discord](https://discord.gg/your-discord-link)
 
 </div>
 
@@ -186,6 +227,21 @@ If you found this project helpful, give it a star!
 
 <div align="center">
 
-Made with ❤️ by Vortex for the AI community
+<img src="https://img.shields.io/github/followers/OE-LUCIFER.svg?style=social&label=Follow" alt="Follow on GitHub">
+
+Crafted with ❤️ by [OE-LUCIFER](https://github.com/OE-LUCIFER)
+
+
+If you find this project helpful, consider supporting our work:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-yellow.svg)](https://www.buymeacoffee.com/OEvortex)
+
+</div>
+
+<div align="center">
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=OE-LUCIFER/Gemini-Chat-API&type=Date)](https://star-history.com/#OE-LUCIFER/Gemini-Chat-API&Date)
 
 </div>
